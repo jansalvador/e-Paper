@@ -155,10 +155,7 @@ class EPD:
             return [0x00] * (int(self.width/8) * self.height)
 
         buf = bytearray(img.tobytes('raw'))
-        # The bytes need to be inverted, because in the PIL world 0=black and 1=white, but
-        # in the e-paper world 0=white and 1=black.
-        for i in range(len(buf)):
-            buf[i] ^= 0xFF
+
         return buf
 
 
