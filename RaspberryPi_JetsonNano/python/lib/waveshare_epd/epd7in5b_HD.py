@@ -159,7 +159,7 @@ class EPD:
         return buf
 
     def display(self, imageblack, imagered=None):
-
+        import pdb; pdb.set_trace()
         self.send_command(0x4F);
         self.send_data(0xAf);
 
@@ -167,10 +167,13 @@ class EPD:
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(imageblack[i]);
 
+        self.send_command(0x26)
         if imagered:
-            self.send_command(0x26)
             for i in range(0, int(self.width * self.height / 8)):
                 self.send_data(~imagered[i]);
+        else:
+            for i in range(0, int(self.width * self.height / 8)):
+                self.send_data(0)
 
         self.send_command(0x22);
         self.send_data(0xC7);    #Load LUT from MCU(0x32)
