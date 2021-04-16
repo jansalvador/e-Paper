@@ -159,7 +159,6 @@ class EPD:
         return buf
 
     def display(self, imageblack, imagered=None):
-        import pdb; pdb.set_trace()
         self.send_command(0x4F);
         self.send_data(0xAf);
 
