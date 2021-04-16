@@ -47,11 +47,11 @@ class EPD:
     # Hardware reset
     def reset(self):
         epdconfig.digital_write(self.reset_pin, 1)
-        epdconfig.delay_ms(200) 
+        epdconfig.delay_ms(200)
         epdconfig.digital_write(self.reset_pin, 0)
         epdconfig.delay_ms(4)
         epdconfig.digital_write(self.reset_pin, 1)
-        epdconfig.delay_ms(200)   
+        epdconfig.delay_ms(200)
 
     def send_command(self, command):
         epdconfig.digital_write(self.dc_pin, 0)
@@ -64,20 +64,20 @@ class EPD:
         epdconfig.digital_write(self.cs_pin, 0)
         epdconfig.spi_writebyte([data])
         epdconfig.digital_write(self.cs_pin, 1)
-        
+
     def ReadBusy(self):
         logging.debug("e-Paper busy")
         busy = epdconfig.digital_read(self.busy_pin)
         while(busy == 1):
             busy = epdconfig.digital_read(self.busy_pin)
         epdconfig.delay_ms(200)
-            
+
     def init(self):
         if (epdconfig.module_init() != 0):
             return -1
-            
+
         self.reset()
-        
+
         self.send_command(0x12); 		  #SWRESET
         self.ReadBusy();        #waiting for the electronic paper IC to release the idle signal
 
@@ -94,7 +94,7 @@ class EPD:
         self.send_data(0xC7);
         self.send_data(0xC3);
         self.send_data(0xC0);
-        self.send_data(0x40);   
+        self.send_data(0x40);
 
         self.send_command(0x01);  # Set MUX as 527
         self.send_data(0xAF);
@@ -125,13 +125,13 @@ class EPD:
         self.send_command(0x20);
         self.ReadBusy();        #waiting for the electronic paper IC to release the idle signal
 
-        self.send_command(0x4E); 
+        self.send_command(0x4E);
         self.send_data(0x00);
         self.send_data(0x00);
-        self.send_command(0x4F); 
+        self.send_command(0x4F);
         self.send_data(0xAF);
         self.send_data(0x02);
-        
+
         return 0
 
     def getbuffer(self, image):
@@ -158,48 +158,49 @@ class EPD:
                         buf[int((newx + newy*self.width) / 8)] &= ~(0x80 >> (y % 8))
         return buf
 
-    def display(self, imageblack, imagered):
-        self.send_command(0x4F); 
+    def display(self, imageblack, imagered=None):
+
+        self.send_command(0x4F);
         self.send_data(0xAf);
-        
+
         self.send_command(0x24)
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(imageblack[i]);
-        
-        
-        self.send_command(0x26)
-        for i in range(0, int(self.width * self.height / 8)):
-            self.send_data(~imagered[i]);
-        
+
+        if imagered:
+            self.send_command(0x26)
+            for i in range(0, int(self.width * self.height / 8)):
+                self.send_data(~imagered[i]);
+
         self.send_command(0x22);
         self.send_data(0xC7);    #Load LUT from MCU(0x32)
         self.send_command(0x20);
-        epdconfig.delay_ms(200);      #!!!The delay here is necessary, 200uS at least!!!     
+        epdconfig.delay_ms(200);      #!!!The delay here is necessary, 200uS at least!!!
         self.ReadBusy();
-        
+
     def Clear(self):
-        self.send_command(0x4F); 
+        self.send_command(0x4F);
         self.send_data(0xAf);
-        
+
         self.send_command(0x24)
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(0xff);
-        
-        
+
+
         self.send_command(0x26)
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(0x00);
-        
+
         self.send_command(0x22);
         self.send_data(0xC7);    #Load LUT from MCU(0x32)
         self.send_command(0x20);
-        epdconfig.delay_ms(200);      #!!!The delay here is necessary, 200uS at least!!!     
+        epdconfig.delay_ms(200);      #!!!The delay here is necessary, 200uS at least!!!
         self.ReadBusy();
 
     def sleep(self):
         self.send_command(0x10);  	#deep sleep
         self.send_data(0x01);
-        
+
         epdconfig.delay_ms(2000)
         epdconfig.module_exit()
 ### END OF FILE ###
